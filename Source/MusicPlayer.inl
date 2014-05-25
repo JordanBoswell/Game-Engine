@@ -8,11 +8,13 @@ MusicPlayer<T_PlaylistID>::MusicPlayer()
 :mStatus(Status::Empty)
 {}
 
+
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::storePlaylist(const T_PlaylistID& id, Playlist&& playlist)
 {
 	mStoredPlaylists.emplace(std::make_pair(id, std::move(playlist)));
 }
+
 
 template<typename T_PlaylistID>
 float MusicPlayer<T_PlaylistID>::getVolume() const
@@ -20,11 +22,13 @@ float MusicPlayer<T_PlaylistID>::getVolume() const
 	return mMusicStream.getVolume();
 }
 
+
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::setVolume(float newVolume)
 {
 	mMusicStream.setVolume(newVolume);
 }
+
 
 template<typename T_PlaylistID>
 typename MusicPlayer<T_PlaylistID>::Status MusicPlayer<T_PlaylistID>::getMusicStatus() const
@@ -32,12 +36,14 @@ typename MusicPlayer<T_PlaylistID>::Status MusicPlayer<T_PlaylistID>::getMusicSt
 	return mStatus;
 }
 
+
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::update()
 {
 	if(mStatus == Status::Playing && mMusicStream.getStatus() == sf::Music::Stopped)
 		nextSong();
 }
+
 
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::play()
@@ -54,6 +60,7 @@ void MusicPlayer<T_PlaylistID>::play()
 	}
 }
 
+
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::pause()
 {
@@ -64,6 +71,7 @@ void MusicPlayer<T_PlaylistID>::pause()
 	}
 }
 
+
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::stopSong()
 {
@@ -73,6 +81,7 @@ void MusicPlayer<T_PlaylistID>::stopSong()
 		mStatus = Status::SongStopped;
 	}
 }
+
 
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::stopPlaylist()
@@ -86,6 +95,7 @@ void MusicPlayer<T_PlaylistID>::stopPlaylist()
 		mStatus = Status::PlaylistStopped;
 	}
 }
+
 
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::nextSong()
@@ -113,6 +123,7 @@ void MusicPlayer<T_PlaylistID>::nextSong()
 	}
 }
 
+
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::previousSong()
 {
@@ -138,6 +149,7 @@ void MusicPlayer<T_PlaylistID>::previousSong()
 			stopPlaylist();
 	}
 }
+
 
 template<typename T_PlaylistID>
 bool MusicPlayer<T_PlaylistID>::loadPlaylist(T_PlaylistID id, bool looped, bool shuffle, bool saveCurrentMusic)
@@ -170,11 +182,13 @@ bool MusicPlayer<T_PlaylistID>::loadPlaylist(T_PlaylistID id, bool looped, bool 
 	return playlistFound;
 }
 
+
 template<typename T_PlaylistID>
 int MusicPlayer<T_PlaylistID>::getNumSavedPlaylists() const
 {
 	return mSavedMusicStates.size();
 }
+
 
 template<typename T_PlaylistID>
 void MusicPlayer<T_PlaylistID>::popCurrentPlaylist()
