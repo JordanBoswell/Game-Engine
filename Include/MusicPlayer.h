@@ -30,11 +30,11 @@ public:
 	using Playlist = std::vector<std::string>; //Filenames of the comprising songs.
 	//The required information needed to cache and later retrieve a Playlist's state. 
 	using MusicState = std::tuple
-								<std::vector<std::string*>, //Playlist 
-								std::vector<std::string*>::iterator, //Song
-								sf::Time, //Elapsed time
-								bool, //Looped Playlist or not.
-								bool>; //Set to shuffle or not.
+							<std::vector<std::string*>, //Playlist 
+							std::vector<std::string*>::iterator, //Song
+							sf::Time, //Elapsed time
+							bool, //Looped Playlist or not.
+							bool>; //Set to shuffle or not.
 
 public:
 	MusicPlayer();
