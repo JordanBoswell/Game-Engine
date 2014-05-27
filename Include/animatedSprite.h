@@ -4,8 +4,9 @@
 
 
 #include <vector>
+#include <functional>
 
-#include <SFML\Graphics\Sprite>
+#include <SFML\Graphics\Sprite.hpp>
 #include <SFML\Graphics\Rect.hpp>
 #include <SFML\System\Time.hpp>
 
@@ -30,20 +31,20 @@ public:
     EachLoopEnd = 1, //at the end of each animation loop
     AnimationCompletion = 2, //at the end of all animation loops
     AnimationSwitch = 4 //if a new animation is set
-    }
+    };
 
-    using AnimationSequence = std::vector<IntRect>;
-    using AnimationSequenceSet = std::vector<framePositions>;
-    static vector<animationSequenceGroup> sAnimations;
+    using AnimationSequence = std::vector<sf::IntRect>;
+    using AnimationSequenceSet = std::vector<AnimationSequence>;
+    static std::vector<AnimationSequenceSet> sAnimations;
 
 
 public:
-    AnimatedSprite(std::vector::size_type objectId);
-    AnimatedSprite(std::vector::size_type objectId, const Texture& texture);
-    AnimatedSprite(std::vector::size_type objectId, const Texture& texture, const sf::IntRect& textureSubRectangle);
+    AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId);
+	AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture);
+	AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture, const sf::IntRect& textureSubRectangle);
         
-    void setAnimation(std::vector::size_type animationId, sf::Time timePerFrame, unsigned numLoops, CallbackConditions callbackConditions = Never, std::function<void()> callback = [](){});
-    void setContinuouslyLoopingAnimation(std::vector::size_type animationId, sf::Time timePerFrame, CallbackConditions callbackConditions = Never, std::function<void()> callback = [](){});
+    void setAnimation(std::vector<AnimationSequence>::size_type animationId, sf::Time timePerFrame, unsigned numLoops, CallbackConditions callbackConditions = Never, std::function<void()> callback = [](){});
+	void setContinuouslyLoopingAnimation(std::vector<AnimationSequence>::size_type animationId, sf::Time timePerFrame, CallbackConditions callbackConditions = Never, std::function<void()> callback = [](){});
     //Update the accumulated frame time, and possibly update the sprite's texture rect.
     //Return true if the animation is finished; otherwise false.
     bool update(sf::Time deltaTime);
@@ -52,7 +53,7 @@ public:
 	
 	
 private:
-    std::vector::size_type mObjectId;  //used to access the proper element in the sAnimations vector
+	std::vector<AnimationSequenceSet>::size_type mObjectId;  //used to access the proper element in the sAnimations vector
     AnimationSequence* mCurrentAnimationSequence;
     AnimationSequence::iterator mCurrentFrame;
     sf::Time mTimePerFrame;

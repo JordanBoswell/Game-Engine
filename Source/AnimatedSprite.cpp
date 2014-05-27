@@ -2,61 +2,61 @@
 #include "AnimatedSprite.h"
 
 
-AnimatedSprite::AnimatedSprite(std::vector::size_type objectId)
+AnimatedSprite::AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId)
 :mObjectId(objectId),
 mCurrentAnimationSequence(nullptr),
 mCallback([](){})
 {
-	assert(objectId >= 0 && objectId < sAnimations.length() && "AnimatedSprite() failed due to objectId being out of vector bounds.");
+	assert(objectId >= 0 && objectId < sAnimations.size() && "AnimatedSprite() failed due to objectId being out of vector bounds.");
 }
 
 
-AnimatedSprite::AnimatedSprite(std::vector::size_type objectId, const Texture& texture)
+AnimatedSprite::AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture)
 :sf::Sprite(texture),
 mObjectId(objectId),
 mCurrentAnimationSequence(nullptr),
 mCallback([](){})
 {
-	assert(objectId >= 0 && objectId < sAnimations.length() && "AnimatedSprite() failed due to objectId being out of vector bounds.");
+	assert(objectId >= 0 && objectId < sAnimations.size() && "AnimatedSprite() failed due to objectId being out of vector bounds.");
 }
 
 
-AnimatedSprite(std::vector::size_type objectId, const Texture& texture, const sf::IntRect& textureSubRectangle)
+AnimatedSprite::AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture, const sf::IntRect& textureSubRectangle)
 :sf::Sprite(texture, textureSubRectangle),
 mObjectId(objectId),
 mCurrentAnimationSequence(nullptr),
 mCallback([](){})
 {
-	assert(objectId >= 0 && objectId < sAnimations.length() && "AnimatedSprite() failed due to objectId being out of vector bounds.");
+	assert(objectId >= 0 && objectId < sAnimations.size() && "AnimatedSprite() failed due to objectId being out of vector bounds.");
 }
 
 
-void AnimatedSprite::setAnimation(std::vector::size_type animationId, sf::Time timePerFrame, unsigned numLoops, CallbackConditions callbackConditions, std::function<void()> callback)
+void AnimatedSprite::setAnimation(std::vector<AnimationSequence>::size_type animationId, sf::Time timePerFrame, unsigned numLoops, CallbackConditions callbackConditions, std::function<void()> callback)
 {
-	assert(animationId >= 0 && animationId < sAnimations[mId].length() && "animationId is out of vector bounds in AnimatedSprite::setAnimation()");
+	assert(animationId >= 0 && animationId < sAnimations[mObjectId].size() && "animationId is out of vector bounds in AnimatedSprite::setAnimation()");
 	assert(timePerFrame > sf::Time::Zero && "encountered: timePerFrame less than or equal to zero in AnimatedSprite::setAnimation");
 	
 	if(mCallbackConditions & AnimationSwitch)
 		mCallback();
 	mCurrentFrame = sAnimations[mObjectId][animationId].begin();
 	mTimePerFrame = timePerFrame;
-	mAccumulatedTime = sf::Time::Zero;
+	mAccumulatedFrameTime = sf::Time::Zero;
 	mContinuouslyLooping = false;
-	mNumLoopsRemaining = numLoopsRemaining;
+	mNumLoopsRemaining = numLoops;
 	mCallback = callback;
 }
 
 
-void AnimatedSprite::setContinuouslyLoopingAnimation(std::vector::size_type animationId, sf::Time timePerFrame, CallbackConditions callbackConditions, std::function<void()> callback)
+void AnimatedSprite::setContinuouslyLoopingAnimation(std::vector<AnimationSequence>::size_type animationId, sf::Time timePerFrame, CallbackConditions callbackConditions, std::function<void()> callback)
 {
-	assert(animationId >= 0 && animationId < sAnimations[mId].length() && "animationId is out of vector bounds in AnimatedSprite::setContinuouslyLoopingAnimation()");
+	assert(animationId >= 0 && animationId < sAnimations[mObjectId].size() && "animationId is out of vector bounds in AnimatedSprite::setContinuouslyLoopingAnimation()");
 	assert(timePerFrame > sf::Time::Zero && "encountered: timePerFrame less than or equal to zero in AnimatedSprite::setContinuouslyLoopingAnimation");
 	
 	if(mCallbackConditions & AnimationSwitch)
 		mCallback();
 	mCurrentFrame = sAnimations[mObjectId][animationId].begin();
 	mTimePerFrame = timePerFrame;
-	mAccumulatedTime = sf::Time::Zero;
+	mAccumulatedFrameTime = sf::Time::Zero;
 	mContinuouslyLooping = true;
 	mCallback = callback;
 }
@@ -79,12 +79,12 @@ bool AnimatedSprite::update(sf::Time deltaTime)
 				mCurrentFrame = mCurrentAnimationSequence->begin();
 				setTextureRect(*mCurrentFrame);
 				if(mCallbackConditions & EachLoopEnd)
-					callback();
+					mCallback();
 			}
 			else
 			{
 				if(mCallbackConditions & EachLoopEnd | AnimationCompletion)
-					callback();
+					mCallback();
 				return true;
 			}
 		}
@@ -97,5 +97,5 @@ bool AnimatedSprite::update(sf::Time deltaTime)
 
 void AnimatedSprite::executeCallback()
 {
-	callback();
+	mCallback();
 }
