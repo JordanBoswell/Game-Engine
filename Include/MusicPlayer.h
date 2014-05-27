@@ -21,7 +21,7 @@ which allows the user to resume the previous Playlist once finished with the cur
 one.  update() must be called frequently to check if the current song has ended,
 at which point the function will play the next song.
 ----------------------------------------------------------------------------------*/
-template<typename T_PlaylistID> //Key used to id the Playlists.
+template<typename T_PlaylistId> //Key used to id the Playlists.
 class MusicPlayer : public sf::NonCopyable
 {
 public:
@@ -30,16 +30,16 @@ public:
 	using Playlist = std::vector<std::string>; //Filenames of the comprising songs.
 	//The required information needed to cache and later retrieve a Playlist's state. 
 	using MusicState = std::tuple
-					<std::vector<std::string*>, //Playlist 
-					std::vector<std::string*>::iterator, //Song
-					sf::Time, //Elapsed time
-					bool, //Looped Playlist or not.
-					bool>; //Set to shuffle or not.
+						<std::vector<std::string*>, //Playlist 
+						int, //Song position in Playlist
+						sf::Time, //Elapsed time
+						bool, //Looped Playlist or not.
+						bool>; //Set to shuffle or not.
 
 public:
 	MusicPlayer();
 	//Store Playlist for possible future retrieval
-	void storePlaylist(const T_PlaylistID& id, Playlist&& playlist);
+	void storePlaylist(const T_PlaylistId& id, Playlist&& playlist);
 	//Volume is in the range 0-100
 	float getVolume() const;
 	void setVolume(float newVolume);
@@ -48,23 +48,29 @@ public:
 	void update();
 	void play();
 	void pause();
+	//Stop music and go to beginning of current song.
 	void stopSong();
+	//Stop music, shuffle Playlist if shuffle is on, and go to beginning of current Playlist.
 	void stopPlaylist();
+	//Go to the next song in the Playlist, keeping previous status.
 	void nextSong();
 	void previousSong();
-	//Load a stored playlist.  A call to play() will then play it.
-	bool loadPlaylist(T_PlaylistID id, bool looped, bool shuffle, bool saveCurrentMusic = false);
+	//Load a stored Playlist which will start with PlaylistStopped status.  Shuffles it if shuffle argument is true.
+	void loadPlaylist(T_PlaylistId id, bool looped, bool shuffle, bool saveCurrentMusic = false);
 	int getNumSavedPlaylists() const;
-	//Clear the loaded playlist(but still keep it in storage).  Load the most recently stored Playlist(if any) 
+	//Clear the loaded playlist(but still keep it in storage).  Load the most recently stored Playlist(if any) with Paused status. 
 	void popCurrentPlaylist();
 	
+private:
+    void openCurrentSongFile();
+    
 	
 private:
 	Status mStatus;
-	std::map<T_PlaylistID, Playlist> mStoredPlaylists;
+	std::map<T_PlaylistId, Playlist> mStoredPlaylists;
 	//Playlist iterators.  Used to shuffle without affecting source.
 	std::vector<std::string*> mCurrentPlaylist;
-	std::vector<std::string*>::iterator mCurrentSong;
+	int mCurrentSong;
 	sf::Music mMusicStream;
 	bool mLooped;
 	bool mShuffle;
@@ -72,6 +78,6 @@ private:
 };
 
 #include "MusicPlayer.inl"
-
+//will we need to add code to ensure the music is played unaffected by listener movement.
 
 #endif

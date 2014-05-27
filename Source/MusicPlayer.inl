@@ -1,52 +1,57 @@
 #include <utility>
 #include <algorithm>
+#include <cassert>
+#include <stdexcept>
 #include "MusicPlayer.h"
 
 
-template<typename T_PlaylistID>
-MusicPlayer<T_PlaylistID>::MusicPlayer()
+template<typename T_PlaylistId>
+MusicPlayer<T_PlaylistId>::MusicPlayer()
 :mStatus(Status::Empty)
-{}
-
-
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::storePlaylist(const T_PlaylistID& id, Playlist&& playlist)
 {
-	mStoredPlaylists.emplace(std::make_pair(id, std::move(playlist)));
+	mMusicStream.setRelativeToListener(true);
 }
 
 
-template<typename T_PlaylistID>
-float MusicPlayer<T_PlaylistID>::getVolume() const
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::storePlaylist(const T_PlaylistId& id, Playlist&& playlist)
+{
+	bool success = mStoredPlaylists.emplace(std::make_pair(id, std::move(playlist))).second;
+    assert(success == true && "emplace() failed in MusicPlayer::storePlaylist()");
+}
+
+
+template<typename T_PlaylistId>
+float MusicPlayer<T_PlaylistId>::getVolume() const
 {
 	return mMusicStream.getVolume();
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::setVolume(float newVolume)
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::setVolume(float newVolume)
 {
 	mMusicStream.setVolume(newVolume);
 }
 
 
-template<typename T_PlaylistID>
-typename MusicPlayer<T_PlaylistID>::Status MusicPlayer<T_PlaylistID>::getMusicStatus() const
+template<typename T_PlaylistId>
+typename MusicPlayer<T_PlaylistId>::Status MusicPlayer<T_PlaylistId>::getMusicStatus() const
 {
 	return mStatus;
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::update()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::update()
 {
 	if(mStatus == Status::Playing && mMusicStream.getStatus() == sf::Music::Stopped)
 		nextSong();
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::play()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::play()
 {
 	switch(mStatus)
 	{
@@ -61,8 +66,8 @@ void MusicPlayer<T_PlaylistID>::play()
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::pause()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::pause()
 {
 	if(mStatus == Status::Playing)
 	{
@@ -72,8 +77,8 @@ void MusicPlayer<T_PlaylistID>::pause()
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::stopSong()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::stopSong()
 {
 	if(mStatus != Status::Empty && mStatus != Status::PlaylistStopped)
 	{
@@ -83,29 +88,29 @@ void MusicPlayer<T_PlaylistID>::stopSong()
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::stopPlaylist()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::stopPlaylist()
 {
 	if(mStatus != Status::Empty && mStatus != Status::PlaylistStopped)
 	{
 		if(mShuffle)
 			std::random_shuffle(mCurrentPlaylist.begin(), mCurrentPlaylist.end());
-		mCurrentSong = mCurrentPlaylist.begin();
-		mMusicStream.openFromFile(**mCurrentSong);
+		mCurrentSong = 0;
+		openCurrentSongFile();
 		mStatus = Status::PlaylistStopped;
 	}
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::nextSong()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::nextSong()
 {
 	if(mStatus != Status::Empty)
 	{
 		++mCurrentSong;
-		if(mCurrentSong != mCurrentPlaylist.end())
+		if(mCurrentSong < mCurrentPlaylist.size())
 		{
-			mMusicStream.openFromFile(**mCurrentSong);
+			openCurrentSongFile();
 			if(mStatus == Status::Playing)
 				mMusicStream.play();
 		}
@@ -113,8 +118,8 @@ void MusicPlayer<T_PlaylistID>::nextSong()
 		{
 			if(mShuffle)
 				std::random_shuffle(mCurrentPlaylist.begin(), mCurrentPlaylist.end());
-			mCurrentSong = mCurrentPlaylist.begin();
-			mMusicStream.openFromFile(**mCurrentSong);
+			mCurrentSong = 0;
+			openCurrentSongFile();
 			if(mStatus == Status::Playing)
 				mMusicStream.play();
 		}
@@ -124,15 +129,15 @@ void MusicPlayer<T_PlaylistID>::nextSong()
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::previousSong()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::previousSong()
 {
 	if(mStatus != Status::Empty)
 	{
-		if(mCurrentSong != mCurrentPlaylist.begin())
+		if(mCurrentSong != 0)
 		{
 			--mCurrentSong;
-			mMusicStream.openFromFile(**mCurrentSong);
+			openCurrentSongFile();
 			if(mStatus == Status::Playing)
 				mMusicStream.play();
 		}
@@ -140,8 +145,8 @@ void MusicPlayer<T_PlaylistID>::previousSong()
 		{
 			if(mShuffle)
 				std::random_shuffle(mCurrentPlaylist.begin(), mCurrentPlaylist.end());
-			mCurrentSong = --mCurrentPlaylist.end();
-			mMusicStream.openFromFile(**mCurrentSong);
+			mCurrentSong = mCurrentPlaylist.size() - 1;
+			openCurrentSongFile();
 			if(mStatus == Status::Playing)
 				mMusicStream.play();
 		}
@@ -151,51 +156,47 @@ void MusicPlayer<T_PlaylistID>::previousSong()
 }
 
 
-template<typename T_PlaylistID>
-bool MusicPlayer<T_PlaylistID>::loadPlaylist(T_PlaylistID id, bool looped, bool shuffle, bool saveCurrentMusic)
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::loadPlaylist(T_PlaylistId id, bool looped, bool shuffle, bool saveCurrentMusic)
 {
-	std::map<T_PlaylistID, Playlist>::iterator playlistToLoadIter = mStoredPlaylists.find(id);
+	std::map<T_PlaylistId, Playlist>::iterator playlistToLoadIter = mStoredPlaylists.find(id);
 	bool playlistFound = playlistToLoadIter == mStoredPlaylists.end() ? false : true;
-	if(playlistFound == true)
-	{
-		if(saveCurrentMusic == true && mCurrentPlaylist.size())
-		{
-			sf::Time elapsedTime = mMusicStream.getPlayingOffset();
-			MusicState stateToBeSaved = std::make_tuple(mCurrentPlaylist, mCurrentSong, elapsedTime, mLooped, mShuffle);
-			mSavedMusicStates.push(stateToBeSaved);
-		}
-		if(mMusicStream.getStatus() == sf::Music::Playing)
-			mMusicStream.stop();
-		mStatus = Status::PlaylistStopped;
-		mCurrentPlaylist.clear();
-		for(auto& song : playlistToLoadIter->second)
-		{
-			mCurrentPlaylist.push_back(&song);
-		}
-		if(shuffle)
-			std::random_shuffle(mCurrentPlaylist.begin(), mCurrentPlaylist.end());
-		mCurrentSong = mCurrentPlaylist.begin();
-		mLooped = looped;
-		mShuffle = shuffle;
-		mMusicStream.openFromFile(**mCurrentSong);
-	}
-	return playlistFound;
+    assert(playlistFound == true && "Playlist not found in mStoredPlaylists in MusicPlayer::loadPlaylist()");
+    if(saveCurrentMusic == true && mCurrentPlaylist.size())
+    {
+        sf::Time elapsedTime = mMusicStream.getPlayingOffset();
+        MusicState stateToBeSaved = std::make_tuple(mCurrentPlaylist, mCurrentSong, elapsedTime, mLooped, mShuffle);
+        mSavedMusicStates.push(stateToBeSaved);
+    }
+    if(mMusicStream.getStatus() == sf::Music::Playing)
+        mMusicStream.stop();
+    mStatus = Status::PlaylistStopped;
+    mCurrentPlaylist.clear();
+    for(auto& song : playlistToLoadIter->second)
+    {
+        mCurrentPlaylist.push_back(&song);
+    }
+    if(shuffle)
+        std::random_shuffle(mCurrentPlaylist.begin(), mCurrentPlaylist.end());
+    mCurrentSong = 0;
+    mLooped = looped;
+    mShuffle = shuffle;
+    openCurrentSongFile();
 }
 
 
-template<typename T_PlaylistID>
-int MusicPlayer<T_PlaylistID>::getNumSavedPlaylists() const
+template<typename T_PlaylistId>
+int MusicPlayer<T_PlaylistId>::getNumSavedPlaylists() const
 {
 	return mSavedMusicStates.size();
 }
 
 
-template<typename T_PlaylistID>
-void MusicPlayer<T_PlaylistID>::popCurrentPlaylist()
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::popCurrentPlaylist()
 {
 	if(mSavedMusicStates.size())
 	{
-		mStatus = Status::PlaylistStopped;
 		MusicState& mostRecentlySavedState = mSavedMusicStates.top();
 		mCurrentPlaylist = std::get<0>(mostRecentlySavedState);
 		mCurrentSong = std::get<1>(mostRecentlySavedState);
@@ -203,12 +204,24 @@ void MusicPlayer<T_PlaylistID>::popCurrentPlaylist()
 		mLooped = std::get<3>(mostRecentlySavedState);
 		mShuffle = std::get<4>(mostRecentlySavedState);
 		mSavedMusicStates.pop();
-		mMusicStream.openFromFile(**mCurrentSong);
+		openCurrentSongFile();
 		mMusicStream.setPlayingOffset(savedTime);
+		mStatus = Status::Paused;
 	}
 	else
 	{
 		mCurrentPlaylist.clear();
+		if(mMusicStream.getStatus() == sf::Music::Playing)
+			mMusicStream.stop();
 		mStatus = Status::Empty;
 	}
+}
+
+
+template<typename T_PlaylistId>
+void MusicPlayer<T_PlaylistId>::openCurrentSongFile()
+{
+	bool success = mMusicStream.openFromFile(*mCurrentPlaylist[mCurrentSong]);
+	if(success == false)
+		throw std::runtime_error("The music stream failed to open " + *mCurrentPlaylist[mCurrentSong] + " in MusicPlayer::openCurrentSongFile()." );
 }
