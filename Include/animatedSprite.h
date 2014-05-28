@@ -40,20 +40,20 @@ public:
 
 public:
     AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId);
-	AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture);
-	AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture, const sf::IntRect& textureSubRectangle);
+    AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture);
+    AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId, const sf::Texture& texture, const sf::IntRect& textureSubRectangle);
         
     void setAnimation(std::vector<AnimationSequence>::size_type animationId, sf::Time timePerFrame, unsigned numLoops, CallbackConditions callbackConditions = Never, std::function<void()> callback = [](){});
-	void setContinuouslyLoopingAnimation(std::vector<AnimationSequence>::size_type animationId, sf::Time timePerFrame, CallbackConditions callbackConditions = Never, std::function<void()> callback = [](){});
+    void setContinuouslyLoopingAnimation(std::vector<AnimationSequence>::size_type animationId, sf::Time timePerFrame, CallbackConditions callbackConditions = Never, std::function<void()> callback = [](){});
     //Update the accumulated frame time, and possibly update the sprite's texture rect.
     //Return true if the animation is finished; otherwise false.
     bool update(sf::Time deltaTime);
     //Manually call the callback.
     void executeCallback();
-	
-	
+    
+    
 private:
-	std::vector<AnimationSequenceSet>::size_type mObjectId;  //used to access the proper element in the sAnimations vector
+    std::vector<AnimationSequenceSet>::size_type mObjectId;  //used to access the proper element in the sAnimations vector
     AnimationSequence* mCurrentAnimationSequence;
     AnimationSequence::iterator mCurrentFrame;
     sf::Time mTimePerFrame;
