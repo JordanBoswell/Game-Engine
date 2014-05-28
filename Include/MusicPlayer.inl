@@ -1,7 +1,3 @@
-#include <utility>
-#include <algorithm>
-#include <cassert>
-#include <stdexcept>
 #include "MusicPlayer.h"
 
 

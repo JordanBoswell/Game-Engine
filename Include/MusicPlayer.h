@@ -3,12 +3,16 @@
 
 
 
-#include <map>
-#include <tuple>
-#include <vector>
-#include <stack>
-#include <SFML\System\Time.hpp>
 #include <SFML\System\NonCopyable.hpp>
+#include <SFML\System\Time.hpp>
+#include <algorithm>
+#include <cassert>
+#include <map>
+#include <stack>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 
 /*----------------------------------------------------------------------------------

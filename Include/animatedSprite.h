@@ -3,13 +3,12 @@
 
 
 
-#include <vector>
-#include <functional>
-
-#include <SFML\Graphics\Sprite.hpp>
 #include <SFML\Graphics\Rect.hpp>
+#include <SFML\Graphics\Sprite.hpp>
 #include <SFML\System\Time.hpp>
-
+#include <cassert>
+#include <functional>
+#include <vector>
 
 
 /*----------------------------------------------------------------------------------
