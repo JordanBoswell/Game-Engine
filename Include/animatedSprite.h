@@ -26,11 +26,11 @@ accessed via an integer or enum.
 class AnimatedSprite : public sf::Sprite
 {
 public:
-    enum CallbackConditions {  //bitflags specifying when the callback is called
-    Never = 0, 
-    EachLoopEnd = 1, //at the end of each animation loop
-    AnimationCompletion = 2, //at the end of all animation loops
-    AnimationSwitch = 4 //if a new animation is set
+    enum CallbackConditions{  //bitflags specifying when the callback is called
+        Never = 0,
+        EachLoopEnd = 1, //at the end of each animation loop
+        AnimationCompletion = 2, //at the end of all animation loops
+        AnimationSwitch = 4 //if a new animation is set
     };
 
     using AnimationSequence = std::vector<sf::IntRect>;
@@ -64,9 +64,6 @@ private:
     CallbackConditions mCallbackConditions;
 };
 
-
-constexpr CallbackConditions operator|(CallbackConditions firstOperand, CallbackConditions secondOperand);
-constexpr CallbackConditions operator&(CallbackConditions firstOperand, CallbackConditions secondOperand);
 
 
 #endif

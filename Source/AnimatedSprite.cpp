@@ -2,6 +2,8 @@
 #include "AnimatedSprite.h"
 
 
+std::vector<AnimatedSprite::AnimationSequenceSet> AnimatedSprite::sAnimations;
+
 AnimatedSprite::AnimatedSprite(std::vector<AnimationSequenceSet>::size_type objectId)
 :mObjectId(objectId),
 mCurrentAnimationSequence(nullptr),
