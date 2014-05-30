@@ -12,11 +12,11 @@ void SoundPlayer::playSound(sf::SoundBuffer& soundBuffer, SoundInfo soundInfo)
     sf::Sound sound(soundBuffer);
     sound.setRelativeToListener(soundInfo.relativeToListener);
     sound.setPosition(soundInfo.position);
-    sound.setVolume(soundInfo.setVolume);
-    sound.setPitch(soundInfo.setPitch);
+    sound.setVolume(soundInfo.volume);
+    sound.setPitch(soundInfo.pitch);
     sound.setMinDistance(soundInfo.minDistance);
-    sound.setAttentuation(soundInfo.attenuation);
-    mSounds.push_back(sf::Sound(soundBuffer))
+    sound.setAttenuation(soundInfo.attenuation);
+    mSounds.push_back(sf::Sound(soundBuffer));
     mSounds.back().play();
 }
 

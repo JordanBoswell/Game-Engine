@@ -4,6 +4,7 @@
 
 
 #include <SFML\Audio\Sound.hpp>
+#include <SFML\System\NonCopyable.hpp>
 #include <SFML\System\Vector3.hpp>
 #include <cassert>
 #include <list>
